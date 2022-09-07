@@ -1,25 +1,48 @@
 <template>
   <div id="app">
-    <Header></Header>
 
-    <Cart></Cart>
+    <video id="js-video" class="reader-video" autoplay playsinline></video>
+    <button @click="scanQR">カメラ</button>
+    <router-view></router-view>
 
-    <Footer></Footer>
   </div>
 </template>
 
 <script>
-import Header from './components/Header.vue';
-import Footer from './components/Footer.vue';
-import Cart from './components/Cart.vue';
 
 export default {
   name: 'App',
   components: {
-    Header,
-    Footer,
-    Cart,
-},
+  },
+  methods: {
+    scanQR() {
+      const video  = document.querySelector('#js-video')
+
+      if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+  alert("Let's get this party started")
+}
+navigator.mediaDevices.getUserMedia({video: true})
+      navigator.mediaDevices
+          .getUserMedia({
+              audio: false,
+              video: {
+                  // facingMode: {
+                  //     exact: 'environment'
+                  // }
+              }
+          })
+          .then(function(stream) {
+              video.srcObject = stream
+              video.onloadedmetadata = function() {
+                  video.play()
+              }
+          })
+          .catch(function(err) {
+              // alert('Error!!')
+              console.log(err)
+          })
+    }
+  }
 }
 </script>
 

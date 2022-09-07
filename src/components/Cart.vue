@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Header></Header>
     <div class="cart_title">買い物カゴ</div>
     <div class="total_price_wrap">
       <p>小計</p><p>{{ totalPrice }}円</p>
@@ -25,13 +26,20 @@
         現在カゴは空です。
       </template>
     </div>
+    <Footer></Footer>
   </div>
 </template>
 
 <script>
+import Header from './Header.vue';
+import Footer from './Footer.vue';
 import { productList } from '../../const'
 
 export default {
+  components: {
+    Header,
+    Footer,
+},
   data() {
     return {
       totalPrice: 0,
