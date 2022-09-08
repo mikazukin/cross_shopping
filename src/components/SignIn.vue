@@ -1,16 +1,38 @@
 <template>
-  <form class="sign_in_form">
+  <div class="sign_in_form">
     <div>
       <p>メールアドレス</p>
-      <input type="email" name="mail">
+      <input type="email" v-model="email">
     </div>
     <div>
       <p>パスワード</p>
-      <input type="password" name="password">
+      <input type="password" v-model="password">
     </div>
-    <button class="submit_button" type="submit">ログイン</button>
-  </form>
+    <button class="submit_button" type="submit" @click="signIn">ログイン</button>
+  </div>
 </template>
+
+<script>
+
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+    }
+  },
+  methods: {
+    signIn() {
+      this.$store.dispatch('signIn', {
+        email: this.email,
+        password: this.password,
+      })
+      this.email = ''
+      this.password = ''
+    },
+  }
+}
+</script>
 
 <style>
   .sign_in_form {
