@@ -35,13 +35,13 @@ export default new Router({
     {
       path: '/',
       component: Cart,
-      beforeEnter(to, from, next) {
-        if(store.getters.idToken) {
-          next()
-        } else {
-          next('/sign_in')
-        }
-      }
+      // beforeEnter(to, from, next) {
+      //   if(store.getters.idToken) {
+      //     next()
+      //   } else {
+      //     next('/sign_in')
+      //   }
+      // }
     }
   ]
 });

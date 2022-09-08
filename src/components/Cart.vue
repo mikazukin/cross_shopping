@@ -25,7 +25,7 @@
             </div>
             <div class="right_inner_wrap">
               <p>価格：{{ product.price }}円</p>
-              <button>削除</button>
+              <button @click="deleteCart(product.id)">削除</button>
             </div>
           </div>
         </div>
@@ -101,12 +101,28 @@ export default {
         }
       )
       .then(
-        window.location.href = '/'
+        res => {
+          const new_id = Number(res.data.fields.product_id.integerValue)
+          const productInfo = productList.find(({id}) => id === new_id)
+          this.selectedProductList.push(productInfo)
+          this.totalPrice += productInfo.price
+        }
       )
       .catch(err => {
         console.log(err)
       })
     },
+    // deleteCart(product_id) {
+    //   axios.delete('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts',
+    //   {
+    //     fields: {
+    //       product_id: {
+    //         integerValue: product_id
+    //       }
+    //     }
+    //   }
+    //   )
+    // },
     scan() {
       let video  = document.createElement("video");
       let canvas = document.getElementById("canvas");
