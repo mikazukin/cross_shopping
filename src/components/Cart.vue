@@ -17,7 +17,17 @@
     <div class="product-list_wrap">
       <template v-if="selectedProductList.length > 0">
         <div class="product_list" v-for="(product, index) in selectedProductList" :key="index">
-          <img class="product_image" src="../assets/image_1.png" alt="商品画像">
+          <!-- 汚いけどやむなし -->
+          <template v-if="Number(product.id) === 1">
+            <img class="product_image" src="../assets/image_1.png" alt="商品画像">
+          </template>
+          <template v-else-if="Number(product.id) === 2">
+            <img class="product_image" src="../assets/image_2.png" alt="商品画像">
+          </template>
+          <template v-else>
+            <img class="product_image" src="../assets/image_1.png" alt="商品画像">
+          </template>
+          
           <div class="right_wrap">
             <div class="right_inner_wrap">
               <p>{{ product.name }}</p>
@@ -36,7 +46,6 @@
     </div>
 
     <div style="height: 200px;">
-      {{ selectedProductListId }}
       服のID：<input type="number" v-model="id">
       <button type="submit" @click="addToCart">カートに追加</button>
     </div>

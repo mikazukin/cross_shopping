@@ -1,5 +1,6 @@
 <template>
   <div class="sign_in_form">
+    <img src="../assets/logo.jpeg" width="190px" height="190px">
     <div>
       <p>メールアドレス</p>
       <input type="email" v-model="email">
