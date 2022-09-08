@@ -67,7 +67,6 @@ import axios from 'axios'
 import Header from './Header.vue';
 import Footer from './Footer.vue';
 import { productList } from '../../const'
-
 import jsQR from "jsqr";
 
 export default {
@@ -98,7 +97,6 @@ export default {
       console.log(this.selectedProductList)
       // cloud firestoreのドキュメントパスを取得
       const document_id_list = res.data.documents.map(el => el.name)
-      console.log(document_id_list)
       // カートに追加した商品のIDを取得
       this.selectedProductListId = res.data.documents.map(el => Number(el.fields.product_id.integerValue))
       // IDに紐づいた商品の情報を取ってくる
