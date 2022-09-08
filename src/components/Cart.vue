@@ -21,7 +21,7 @@
           <div class="right_wrap">
             <div class="right_inner_wrap">
               <p>{{ product.name }}</p>
-              <p>数量：{{ product.quantity }}</p>
+              <p>数量：1</p>
             </div>
             <div class="right_inner_wrap">
               <p>価格：{{ product.price }}円</p>
@@ -76,11 +76,16 @@ export default {
       this.selectedProductListId.forEach(el => {
         const productInfo = productList.find(({id}) => id === Number(el))
         this.selectedProductList.push(productInfo)
+        this.totalPrice += productInfo.price
       })
     })
   },
   methods: {
     addToCart() {
+      if(productList.find(({id}) => id === Number(this.id)) == undefined) {
+        alert('入力したIDに対応する商品はありません。')
+        return false
+      }
       axios.post('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts',
         {
           fields: {
@@ -96,8 +101,6 @@ export default {
       .catch(err => {
         console.log(err)
       })
-
-      this.id = ''
     },
     scan() {
       let video  = document.createElement("video");
