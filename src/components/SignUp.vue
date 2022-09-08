@@ -1,16 +1,36 @@
 <template>
-  <form class="sign_up_form">
+  <div class="sign_up_form">
     <div>
       <p>メールアドレス</p>
-      <input type="email" name="mail">
+      <input type="email" v-model="email">
     </div>
     <div>
-      <p>パスワード</p>
-      <input type="password" name="password">
+      <p>パスワード(6文字以上)</p>
+      <input type="password" v-model="password">
     </div>
-    <button class="submit_button" type="submit">登録</button>
-  </form>
+    <button class="submit_button" type="submit" @click="signUp">登録</button>
+  </div>
 </template>
+
+<script>
+
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+    }
+  },
+  methods: {
+    signUp() {
+      this.$store.dispatch('signUp', {
+        email: this.email,
+        password: this.password,
+      })
+    },
+  }
+}
+</script>
 
 <style>
   .sign_up_form {

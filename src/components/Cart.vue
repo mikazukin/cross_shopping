@@ -67,6 +67,11 @@ export default {
       selectedProductList: [],
     }
   },
+  computed: {
+    idToken() {
+      return this.$store.getters.idToken
+    }
+  },
   created() {
     axios.get('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts')
     .then(res => {
