@@ -47,13 +47,13 @@ export default new Router({
     {
       path: '/scan',
       component: Scan,
-      beforeEnter(to, from, next) {
-        if(store.getters.idToken) {
-          next()
-        } else {
-          next('/sign_in')
-        }
-      }
+      // beforeEnter(to, from, next) {
+      //   if(store.getters.idToken) {
+      //     next()
+      //   } else {
+      //     next('/sign_in')
+      //   }
+      // }
     }
   ]
 });
