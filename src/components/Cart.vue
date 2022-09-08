@@ -25,7 +25,7 @@
             </div>
             <div class="right_inner_wrap">
               <p>価格：{{ product.price }}円</p>
-              <button @click="deleteCart(product.id)">削除</button>
+              <button @click="deleteCart(product.document_name, product.id)">削除</button>
             </div>
           </div>
         </div>
@@ -60,7 +60,7 @@ export default {
   },
   data() {
     return {
-      id: 1,
+      id: null,
       totalPrice: 0,
       productList: productList,
       selectedProductListId: [],
@@ -73,22 +73,34 @@ export default {
     }
   },
   created() {
+    console.log(this.selectedProductList)
     axios.get('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts')
-    .then(res => {
+    .then(
+      res => {
+      console.log(this.selectedProductList)
+      // cloud firestoreのドキュメントパスを取得
+      const document_id_list = res.data.documents.map(el => el.name)
+      console.log(document_id_list)
       // カートに追加した商品のIDを取得
-      this.selectedProductListId = res.data.documents.map(el => el.fields.product_id.integerValue)
+      this.selectedProductListId = res.data.documents.map(el => Number(el.fields.product_id.integerValue))
       // IDに紐づいた商品の情報を取ってくる
-      this.selectedProductListId.forEach(el => {
-        const productInfo = productList.find(({id}) => id === Number(el))
+      this.selectedProductListId.forEach((el, index) => {
+        let productInfo = productList.find(({id}) => id === Number(el))
+        Object.assign(productInfo, {document_name: document_id_list[index]})
         this.selectedProductList.push(productInfo)
         this.totalPrice += productInfo.price
       })
-    })
+    }
+    )
   },
   methods: {
     addToCart() {
       if(productList.find(({id}) => id === Number(this.id)) == undefined) {
         alert('入力したIDに対応する商品はありません。')
+        return false
+      }
+      else if(this.selectedProductListId.includes(Number(this.id))) {
+        alert('すでに同じ商品がカートに入っています')
         return false
       }
       axios.post('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts',
@@ -102,8 +114,11 @@ export default {
       )
       .then(
         res => {
+          console.log(res.data)
           const new_id = Number(res.data.fields.product_id.integerValue)
           const productInfo = productList.find(({id}) => id === new_id)
+          Object.assign(productInfo, {document_name: res.data.name})
+          this.selectedProductListId.push(new_id)
           this.selectedProductList.push(productInfo)
           this.totalPrice += productInfo.price
         }
@@ -112,17 +127,25 @@ export default {
         console.log(err)
       })
     },
-    // deleteCart(product_id) {
-    //   axios.delete('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts',
-    //   {
-    //     fields: {
-    //       product_id: {
-    //         integerValue: product_id
-    //       }
-    //     }
-    //   }
-    //   )
-    // },
+    deleteCart(document_name, product_id) {
+      console.log(document_name)
+      axios.delete(`https://firestore.googleapis.com/v1/${document_name}`)
+      .then(
+        this.selectedProductList.forEach((el, index) => {
+          if(el.document_name == document_name) {
+            console.log(this.selectedProductList.splice(index, 1))
+            return false
+          }
+        }),
+
+        this.selectedProductListId.forEach((id, index) => {
+          if(Number(id) === Number(product_id)) {
+            console.log(this.selectedProductListId.splice(index, 1))
+            return false
+          }
+        })
+      )
+    },
     scan() {
       let video  = document.createElement("video");
       let canvas = document.getElementById("canvas");
