@@ -11,6 +11,8 @@
 
 <script>
 import jsQR from "jsqr";
+import axios from 'axios'
+
 export default {
   methods: {
     scan() {
@@ -40,6 +42,18 @@ export default {
           if(code){
             drawRect(code.location);// Rect
             msg.innerText = code.data;// Data
+
+            axios.post('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts',
+              {
+                fields: {
+                  product_id: {
+                    integerValue: code.data
+                  }
+                }
+              }
+            )
+            .then(window.location = '/')
+            .catch(err => console.log(err))
           }else{
             msg.innerText = "Detecting QR-Code...";
           }

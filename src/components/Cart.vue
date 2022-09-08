@@ -90,11 +90,9 @@ export default {
     }
   },
   created() {
-    console.log(this.selectedProductList)
     axios.get('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts')
     .then(
       res => {
-      console.log(this.selectedProductList)
       // cloud firestoreのドキュメントパスを取得
       const document_id_list = res.data.documents.map(el => el.name)
       // カートに追加した商品のIDを取得
@@ -190,6 +188,18 @@ export default {
           if(code){
             drawRect(code.location);// Rect
             msg.innerText = code.data;// Data
+
+            axios.post('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts',
+              {
+                fields: {
+                  product_id: {
+                    integerValue: code.data
+                  }
+                }
+              }
+            )
+            .then(window.location = '/')
+            .catch(err => console.log(err))
           }else{
             msg.innerText = "Detecting QR-Code...";
           }
