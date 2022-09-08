@@ -1,6 +1,14 @@
 <template>
   <div>
     <Header></Header>
+
+    <h1>jsQR</h1>
+    <button @click="scan">クリック</button>
+		<div id="wrapper">
+			<div id="msg">Unable to access video stream.</div>
+			<canvas id="canvas"></canvas>
+		</div>
+
     <div class="cart_title">買い物カゴ</div>
     <div class="total_price_wrap">
       <p>小計</p><p>{{ totalPrice }}円</p>
@@ -26,27 +34,122 @@
         現在カゴは空です。
       </template>
     </div>
+
+    <div style="height: 200px;">
+      {{ selectedProductListId }}
+      服のID：<input type="number" v-model="id">
+      <button type="submit" @click="addToCart">カートに追加</button>
+    </div>
+
     <Footer></Footer>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
 import Header from './Header.vue';
 import Footer from './Footer.vue';
 import { productList } from '../../const'
+
+import jsQR from "jsqr";
 
 export default {
   components: {
     Header,
     Footer,
-},
+  },
   data() {
     return {
+      id: 1,
       totalPrice: 0,
       productList: productList,
-      selectedProductList: [{id: 1, name: "鋭Tシャツ", price: 1200, quantity: 1}],
+      selectedProductListId: [],
+      selectedProductList: [],
     }
   },
+  created() {
+    axios.get('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts')
+    .then(res => {
+      // カートに追加した商品のIDを取得
+      this.selectedProductListId = res.data.documents.map(el => el.fields.product_id.integerValue)
+      // IDに紐づいた商品の情報を取ってくる
+      this.selectedProductListId.forEach(el => {
+        const productInfo = productList.find(({id}) => id === Number(el))
+        this.selectedProductList.push(productInfo)
+      })
+    })
+  },
+  methods: {
+    addToCart() {
+      axios.post('https://firestore.googleapis.com/v1/projects/cross-shopping-backend/databases/(default)/documents/carts',
+        {
+          fields: {
+            product_id: {
+              integerValue: this.id
+            }
+          }
+        }
+      )
+      .then(
+        window.location.href = '/'
+      )
+      .catch(err => {
+        console.log(err)
+      })
+
+      this.id = ''
+    },
+    scan() {
+      let video  = document.createElement("video");
+      let canvas = document.getElementById("canvas");
+      let ctx    = canvas.getContext("2d");
+      let msg    = document.getElementById("msg");
+
+      const userMedia = {video: {facingMode: "environment"}};
+      navigator.mediaDevices.getUserMedia(userMedia)
+      .then((stream)=>{
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true);
+        video.play();
+        startTick();
+      })
+      .catch((err) => {alert(err)});
+
+      function startTick(){
+        msg.innerText = "Loading video...";
+        if(video.readyState === video.HAVE_ENOUGH_DATA){
+          canvas.height = video.videoHeight;
+          canvas.width = video.videoWidth;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          let img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          let code = jsQR(img.data, img.width, img.height, {inversionAttempts: "dontInvert"});
+          if(code){
+            drawRect(code.location);// Rect
+            msg.innerText = code.data;// Data
+          }else{
+            msg.innerText = "Detecting QR-Code...";
+          }
+        }
+        setTimeout(startTick, 250);
+      }
+
+      function drawRect(location){
+        drawLine(location.topLeftCorner,     location.topRightCorner);
+        drawLine(location.topRightCorner,    location.bottomRightCorner);
+        drawLine(location.bottomRightCorner, location.bottomLeftCorner);
+        drawLine(location.bottomLeftCorner,  location.topLeftCorner);
+      }
+
+      function drawLine(begin, end){
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = "#FF3B58";
+        ctx.beginPath();
+        ctx.moveTo(begin.x, begin.y);
+        ctx.lineTo(end.x, end.y);
+        ctx.stroke();
+      }
+    },
+  }
 }
 </script>
 
