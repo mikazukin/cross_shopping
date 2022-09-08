@@ -4,10 +4,10 @@
       <img class="button_image" src="../assets/search_image.png" alt="お店を探す">
       お店を探す
     </a>
-    <div class="logo_button" @click="scan">
+    <router-link class="logo_button" to="/scan">
       <img class="button_image" src="../assets/camera.png" alt="スキャン">
       スキャン
-    </div>
+    </router-link>
     <a href="#" class="logo_button">
       <img class="button_image" src="../assets/history_image.png" alt="購入履歴">
       購入履歴

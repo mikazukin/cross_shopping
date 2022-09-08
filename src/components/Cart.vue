@@ -2,13 +2,6 @@
   <div>
     <Header></Header>
 
-    <h1>jsQR</h1>
-    <button @click="scan">クリック</button>
-		<div id="wrapper">
-			<div id="msg">Unable to access video stream.</div>
-			<canvas id="canvas"></canvas>
-		</div>
-
     <div class="cart_title">買い物カゴ</div>
     <div class="total_price_wrap">
       <p>小計</p><p>{{ totalPrice }}円</p>
@@ -17,7 +10,17 @@
     <div class="product-list_wrap">
       <template v-if="selectedProductList.length > 0">
         <div class="product_list" v-for="(product, index) in selectedProductList" :key="index">
-          <img class="product_image" src="../assets/image_1.png" alt="商品画像">
+          <!-- 汚いけどやむなし -->
+          <template v-if="Number(product.id) === 1">
+            <img class="product_image" src="../assets/image_1.png" alt="商品画像">
+          </template>
+          <template v-else-if="Number(product.id) === 2">
+            <img class="product_image" src="../assets/image_2.png" alt="商品画像">
+          </template>
+          <template v-else>
+            <img class="product_image" src="../assets/image_1.png" alt="商品画像">
+          </template>
+
           <div class="right_wrap">
             <div class="right_inner_wrap">
               <p>{{ product.name }}</p>
@@ -25,7 +28,7 @@
             </div>
             <div class="right_inner_wrap">
               <p>価格：{{ product.price }}円</p>
-              <button @click="deleteCart(product.document_name, product.id)">削除</button>
+              <button class="delete_button" @click="deleteCart(product.document_name, product.id)">削除</button>
             </div>
           </div>
         </div>
@@ -35,11 +38,25 @@
       </template>
     </div>
 
-    <div style="height: 200px;">
-      {{ selectedProductListId }}
-      服のID：<input type="number" v-model="id">
-      <button type="submit" @click="addToCart">カートに追加</button>
+    <div style="margin-top: 40px; height: 200px;">
+      <button @click="whichTab = 'id'">ID入力</button>
+      <button @click="whichTab = 'qr'">QR読み取り</button>
+      <template v-if="whichTab == 'id'">
+        <div>
+          服のID：<input type="number" v-model="id">
+          <button type="submit" @click="addToCart">カートに追加</button>
+        </div>
+      </template>
+      <template v-if="whichTab == 'qr'">
+        <h1>QR</h1>
+        <button @click="scan">クリック</button>
+        <div id="wrapper">
+          <div id="msg">Unable to access video stream.</div>
+          <canvas id="canvas"></canvas>
+        </div>
+      </template>
     </div>
+    
 
     <Footer></Footer>
   </div>
@@ -50,7 +67,6 @@ import axios from 'axios'
 import Header from './Header.vue';
 import Footer from './Footer.vue';
 import { productList } from '../../const'
-
 import jsQR from "jsqr";
 
 export default {
@@ -60,6 +76,7 @@ export default {
   },
   data() {
     return {
+      whichTab: 'id',
       id: null,
       totalPrice: 0,
       productList: productList,
@@ -80,7 +97,6 @@ export default {
       console.log(this.selectedProductList)
       // cloud firestoreのドキュメントパスを取得
       const document_id_list = res.data.documents.map(el => el.name)
-      console.log(document_id_list)
       // カートに追加した商品のIDを取得
       this.selectedProductListId = res.data.documents.map(el => Number(el.fields.product_id.integerValue))
       // IDに紐づいた商品の情報を取ってくる
@@ -133,7 +149,8 @@ export default {
       .then(
         this.selectedProductList.forEach((el, index) => {
           if(el.document_name == document_name) {
-            console.log(this.selectedProductList.splice(index, 1))
+            this.totalPrice -= el.price
+            this.selectedProductList.splice(index, 1)
             return false
           }
         }),
@@ -143,7 +160,7 @@ export default {
             console.log(this.selectedProductListId.splice(index, 1))
             return false
           }
-        })
+        }),
       )
     },
     scan() {
@@ -229,5 +246,10 @@ export default {
 .right_inner_wrap {
   display: flex;
   justify-content: space-around;
+  align-items: center;
+}
+
+.delete_button {
+  height: 30px;
 }
 </style>
